@@ -1,7 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:donationapp/models/add_user_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:uuid/uuid.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -12,10 +15,24 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final userInfo = FirebaseAuth.instance.currentUser!;
+  TextEditingController controller = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        title: TextFormField(
+          controller: controller,
+        ),
+        actions: [
+          IconButton(
+              onPressed: () {
+                final name = controller.text;
+                createUser(name: name);
+                controller.clear();
+              },
+              icon: const Icon(Icons.add))
+        ],
+      ),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -42,5 +59,18 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+
+  Future createUser({required String name}) async {
+    var uuid = const Uuid();
+
+    //Reference to the document
+    final docUser =
+        FirebaseFirestore.instance.collection('users').doc(uuid.v4());
+    final json = UserModel(
+        id: docUser.id, name: name, age: 21, birthday: DateTime.now());
+    final jsonResponse = json.toJson();
+    //create new document and write new data to firestore
+    await docUser.set(jsonResponse);
   }
 }
