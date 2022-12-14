@@ -27,8 +27,15 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
               onPressed: () {
                 final name = controller.text;
-                createUser(name: name);
-                controller.clear();
+
+                if (name.isNotEmpty) {
+                  createUser(name: name);
+                  controller.clear();
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      backgroundColor: Colors.red,
+                      content: Text('Please enter name')));
+                }
               },
               icon: const Icon(Icons.add))
         ],
